@@ -13,12 +13,15 @@ import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 public class FrmOrdenamiento extends JFrame {
 
     private JButton btnOrdenarBurbuja;
     private JButton btnOrdenarRapido;
     private JButton btnOrdenarInsercion;
+    private JButton btnOrdenarSeleccion;
+    private JButton btnOrdenarMezcla;
     private JToolBar tbOrdenamiento;
     private JComboBox cmbCriterio;
     private JTextField txtTiempo;
@@ -33,6 +36,8 @@ public class FrmOrdenamiento extends JFrame {
         btnOrdenarBurbuja = new JButton();
         btnOrdenarInsercion = new JButton();
         btnOrdenarRapido = new JButton();
+        btnOrdenarSeleccion = new JButton();
+        btnOrdenarMezcla = new JButton();
         cmbCriterio = new JComboBox();
         txtTiempo = new JTextField();
 
@@ -72,6 +77,24 @@ public class FrmOrdenamiento extends JFrame {
         });
         tbOrdenamiento.add(btnOrdenarInsercion);
 
+        btnOrdenarSeleccion.setIcon(new ImageIcon(getClass().getResource("/iconos/OrdenarSeleccion.png")));
+        btnOrdenarSeleccion.setToolTipText("Ordenar Selección");
+        btnOrdenarSeleccion.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                btnOrdenarSeleccionClick(evt);
+            }
+        });
+        tbOrdenamiento.add(btnOrdenarSeleccion);
+
+        btnOrdenarMezcla.setIcon(new ImageIcon(getClass().getResource("/iconos/OrdenarMezcla.png")));
+        btnOrdenarMezcla.setToolTipText("Ordenar Mezcla");
+        btnOrdenarMezcla.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                btnOrdenarMezclaClick(evt);
+            }
+        });
+        tbOrdenamiento.add(btnOrdenarMezcla);
+
         cmbCriterio.setModel(new DefaultComboBoxModel(
                 new String[] { "Nombre Completo, Tipo de Documento", "Tipo de Documento, Nombre Completo" }));
         tbOrdenamiento.add(cmbCriterio);
@@ -93,7 +116,7 @@ public class FrmOrdenamiento extends JFrame {
         getContentPane().add(spDocumentos, BorderLayout.CENTER);
 
         String nombreArchivo = System.getProperty("user.dir")
-                + "/src/datos/Datos.csv";
+                + "/ITM_ED_Ordenamiento_Java-main/src/datos/Datos.csv";
 
         Documento.desdeArchivo(nombreArchivo);
         Documento.mostrar(tblDocumentos);
@@ -122,11 +145,48 @@ public class FrmOrdenamiento extends JFrame {
     }
 
     private void btnOrdenarInsercionClick(ActionEvent evt) {
+        if (cmbCriterio.getSelectedIndex() >= 0) {
+            Util.iniciarCronometro();
+            Documento.ordenarInsercion(cmbCriterio.getSelectedIndex());
+            txtTiempo.setText(Util.getTextoTiempoCronometro());
+            Documento.mostrar(tblDocumentos);
+        } else {
+            JOptionPane.showMessageDialog(null, "Elija el criterio de ordenamiento");
+        }
+    }
 
+    private void btnOrdenarSeleccionClick(ActionEvent evt) {
+        if (cmbCriterio.getSelectedIndex() >= 0) {
+            Util.iniciarCronometro();
+            Documento.ordenarSeleccion(cmbCriterio.getSelectedIndex());
+            txtTiempo.setText(Util.getTextoTiempoCronometro());
+            Documento.mostrar(tblDocumentos);
+        } else {
+            JOptionPane.showMessageDialog(null, "Elija el criterio de ordenamiento");
+        }
+    }
+
+    private void btnOrdenarMezclaClick(ActionEvent evt) {
+        if (cmbCriterio.getSelectedIndex() >= 0) {
+            Util.iniciarCronometro();
+            Documento.ordenarMezcla(cmbCriterio.getSelectedIndex());
+            txtTiempo.setText(Util.getTextoTiempoCronometro());
+            Documento.mostrar(tblDocumentos);
+        } else {
+            JOptionPane.showMessageDialog(null, "Elija el criterio de ordenamiento");
+        }
     }
 
     private void btnBuscar(ActionEvent evt) {
+        String terminoBusqueda = txtBuscar.getText().toLowerCase().trim();
+        int criterioSeleccionado = cmbCriterio.getSelectedIndex();
 
+        if (terminoBusqueda.isEmpty()) {
+            Documento.mostrar(tblDocumentos);
+        } else {
+            List<Documento> documentosFiltrados = Documento.buscarDocumentos(terminoBusqueda, criterioSeleccionado);
+
+            Documento.mostrar(tblDocumentos, documentosFiltrados);
+        }
     }
-
 }

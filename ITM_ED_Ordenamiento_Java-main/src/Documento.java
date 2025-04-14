@@ -1,6 +1,5 @@
 import java.io.BufferedReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -43,6 +42,7 @@ public class Documento {
 
     private static List<Documento> documentos = new ArrayList();
     private static String[] encabezados;
+    private static Map<String, List<Documento>> indiceBusqueda;
 
 
     public static int getTamaño(){
@@ -75,7 +75,7 @@ public class Documento {
         }
     }
 
-    public static void mostrar(JTable tbl) {
+    public static void mostrar(JTable tbl, List<Documento> documentos) {
         String[][] datos = new String[documentos.size()][encabezados.length];
         int fila = 0;
         for (Documento d : documentos) {
@@ -87,6 +87,10 @@ public class Documento {
         }
         DefaultTableModel dtm = new DefaultTableModel(datos, encabezados);
         tbl.setModel(dtm);
+    }
+
+    public static void mostrar(JTable tbl) {
+        mostrar(tbl, documentos);  // Mostrar todos los documentos cargados
     }
 
     private static boolean esMayor(Documento d1, Documento d2, int criterio) {
@@ -149,4 +153,89 @@ public class Documento {
         ordenarRapido(pivote + 1, fin, criterio); // ordenar los mayores a la posicion PIVOTE
     }
 
+    public static String ordenarInsercion(int criterio) {
+        Util.iniciarCronometro();
+        for (int i = 1; i < documentos.size(); i++) {
+            Documento actual = documentos.get(i);
+            int j = i - 1;
+            while (j >= 0 && esMayor(documentos.get(j), actual, criterio)) {
+                documentos.set(j + 1, documentos.get(j));
+                j--;
+            }
+            documentos.set(j + 1, actual);
+        }
+        return Util.getTextoTiempoCronometro();
+    }
+    public static String ordenarSeleccion(int criterio) {
+        Util.iniciarCronometro();
+        for (int i = 0; i < documentos.size() - 1; i++) {
+            int min = i;
+            for (int j = i + 1; j < documentos.size(); j++) {
+                if (esMayor(documentos.get(min), documentos.get(j), criterio)) {
+                    min = j;
+                }
+            }
+            if (min != i) {
+                intercambiar(i, min);
+            }
+        }
+        return Util.getTextoTiempoCronometro();
+    }
+
+    public static String ordenarMezcla(int criterio) {
+        Util.iniciarCronometro();
+        documentos = Arrays.asList(mergeSort(documentos.toArray(new Documento[0]), criterio));
+        return Util.getTextoTiempoCronometro();
+    }
+
+    private static Documento[] mergeSort(Documento[] array, int criterio) {
+        if (array.length <= 1) {
+            return array;
+        }
+        int medio = array.length / 2;
+        Documento[] izquierda = Arrays.copyOfRange(array, 0, medio);
+        Documento[] derecha = Arrays.copyOfRange(array, medio, array.length);
+        return merge(mergeSort(izquierda, criterio), mergeSort(derecha, criterio), criterio);
+    }
+
+    private static Documento[] merge(Documento[] izq, Documento[] der, int criterio) {
+        Documento[] resultado = new Documento[izq.length + der.length];
+        int i = 0, j = 0, k = 0;
+        while (i < izq.length && j < der.length) {
+            if (esMayor(izq[i], der[j], criterio)) {
+                resultado[k++] = der[j++];
+            } else {
+                resultado[k++] = izq[i++];
+            }
+        }
+        while (i < izq.length) {
+            resultado[k++] = izq[i++];
+        }
+        while (j < der.length) {
+            resultado[k++] = der[j++];
+        }
+        return resultado;
+    }
+
+    public static List<Documento> buscarDocumentos(String terminoBusqueda, int criterioSeleccionado) {
+        List<Documento> resultados = new ArrayList<>();
+
+        for (Documento d : documentos) {
+            String campoBusqueda = "";
+
+            if (criterioSeleccionado == 0) {
+                // Criterio: Nombre Completo, Tipo de Documento
+                campoBusqueda = d.getNombreCompleto().toLowerCase() + " " + d.getDocumento().toLowerCase();
+            } else if (criterioSeleccionado == 1) {
+                // Criterio: Tipo de Documento, Nombre Completo
+                campoBusqueda = d.getDocumento().toLowerCase() + " " + d.getNombreCompleto().toLowerCase();
+            }
+
+            // Verificar si el término de búsqueda está en el campo
+            if (campoBusqueda.contains(terminoBusqueda)) {
+                resultados.add(d);
+            }
+        }
+        return resultados;
+    }
 }
