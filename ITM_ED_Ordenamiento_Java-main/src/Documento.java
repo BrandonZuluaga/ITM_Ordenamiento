@@ -42,7 +42,6 @@ public class Documento {
 
     private static List<Documento> documentos = new ArrayList();
     private static String[] encabezados;
-    private static Map<String, List<Documento>> indiceBusqueda;
 
 
     public static int getTamaño(){
