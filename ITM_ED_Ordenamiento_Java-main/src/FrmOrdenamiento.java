@@ -96,7 +96,7 @@ public class FrmOrdenamiento extends JFrame {
         tbOrdenamiento.add(btnOrdenarMezcla);
 
         cmbCriterio.setModel(new DefaultComboBoxModel(
-                new String[] { "Nombre Completo, Tipo de Documento", "Tipo de Documento, Nombre Completo" }));
+                new String[]{"Nombre Completo, Tipo de Documento", "Tipo de Documento, Nombre Completo"}));
         tbOrdenamiento.add(cmbCriterio);
         tbOrdenamiento.add(txtTiempo);
 
@@ -104,11 +104,23 @@ public class FrmOrdenamiento extends JFrame {
         btnBuscar.setToolTipText("Buscar");
         btnBuscar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btnBuscar(evt);
+                btnBuscarClick(evt);
             }
         });
-        tbOrdenamiento.add(btnBuscar);
+
         tbOrdenamiento.add(txtBuscar);
+        tbOrdenamiento.add(btnBuscar);
+
+        JButton btnBuscarBinaria = new JButton();
+        btnBuscarBinaria.setIcon(new ImageIcon(getClass().getResource("/iconos/Buscar2.png")));
+        btnBuscarBinaria.setToolTipText("Buscar Binaria");
+        btnBuscarBinaria.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                btnBuscarBinariaClick(evt);
+            }
+        });
+        tbOrdenamiento.add(btnBuscarBinaria);
+
 
         JScrollPane spDocumentos = new JScrollPane(tblDocumentos);
 
@@ -177,7 +189,7 @@ public class FrmOrdenamiento extends JFrame {
         }
     }
 
-    private void btnBuscar(ActionEvent evt) {
+    private void btnBuscarClick(ActionEvent evt) {
         String terminoBusqueda = txtBuscar.getText().toLowerCase().trim();
         int criterioSeleccionado = cmbCriterio.getSelectedIndex();
 
@@ -187,6 +199,25 @@ public class FrmOrdenamiento extends JFrame {
             List<Documento> documentosFiltrados = Documento.buscarDocumentos(terminoBusqueda, criterioSeleccionado);
 
             Documento.mostrar(tblDocumentos, documentosFiltrados);
+        }
+    }
+
+    private void btnBuscarBinariaClick(ActionEvent evt) {
+        String terminoBusqueda = txtBuscar.getText().trim();
+
+        if (terminoBusqueda.isEmpty()) {
+            Documento.mostrar(tblDocumentos);
+            return;
+        }
+
+        Documento.ordenarMezcla(cmbCriterio.getSelectedIndex());
+
+        List<Documento> resultados = Documento.busquedaBinariaPorNombre(terminoBusqueda);
+
+        if (resultados.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No se encontró ningún registro con el nombre: " + terminoBusqueda);
+        } else {
+            Documento.mostrar(tblDocumentos, resultados);
         }
     }
 }

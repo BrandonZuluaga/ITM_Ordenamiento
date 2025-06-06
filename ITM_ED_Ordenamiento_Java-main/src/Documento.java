@@ -35,7 +35,7 @@ public class Documento {
     }
 
     public String getNombreCompleto() {
-        return apellido1 + " " + apellido2 + " " + nombre;
+        return nombre + " " + apellido1 + " " + apellido2;
     }
 
     // ****** Atributos y metodos estaticos ******
@@ -44,7 +44,7 @@ public class Documento {
     private static String[] encabezados;
 
 
-    public static int getTamaño(){
+    public static int getTamaño() {
         return documentos.size();
     }
 
@@ -165,6 +165,7 @@ public class Documento {
         }
         return Util.getTextoTiempoCronometro();
     }
+
     public static String ordenarSeleccion(int criterio) {
         Util.iniciarCronometro();
         for (int i = 0; i < documentos.size() - 1; i++) {
@@ -237,4 +238,48 @@ public class Documento {
         }
         return resultados;
     }
+
+    public static List<Documento> busquedaBinariaPorNombre(String nombreBuscado) {
+        List<Documento> encontrados = new ArrayList<>();
+
+        // Asegurarse que la lista esté ordenada por nombre
+        nombreBuscado = nombreBuscado.toLowerCase().trim();
+        int inicio = 0;
+        int fin = documentos.size() - 1;
+
+        while (inicio <= fin) {
+            int medio = (inicio + fin) / 2;
+            String nombreActual = documentos.get(medio).getNombre().toLowerCase().trim();
+            int comparacion = nombreBuscado.compareTo(nombreActual);
+
+            if (comparacion == 0) {
+                // Encontrado uno, ahora expandimos a izquierda y derecha
+                // Agregar el encontrado
+                encontrados.add(documentos.get(medio));
+
+                // Buscar hacia la izquierda
+                int izquierda = medio - 1;
+                while (izquierda >= 0 && documentos.get(izquierda).getNombre().equalsIgnoreCase(nombreBuscado)) {
+                    encontrados.add(documentos.get(izquierda));
+                    izquierda--;
+                }
+
+                // Buscar hacia la derecha
+                int derecha = medio + 1;
+                while (derecha < documentos.size() && documentos.get(derecha).getNombre().equalsIgnoreCase(nombreBuscado)) {
+                    encontrados.add(documentos.get(derecha));
+                    derecha++;
+                }
+
+                break;
+            } else if (comparacion < 0) {
+                fin = medio - 1;
+            } else {
+                inicio = medio + 1;
+            }
+        }
+
+        return encontrados;
+    }
+
 }
